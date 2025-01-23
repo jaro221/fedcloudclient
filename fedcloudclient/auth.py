@@ -7,6 +7,7 @@ import liboidcagent as agent
 import requests
 import os
 import re
+import click
 
 from fedcloudclient.conf import CONF as CONF
 from fedcloudclient.exception import TokenError
@@ -203,4 +204,19 @@ class OIDCToken(Token):
 
         return sorted(vos)
 
+    def check_access(self) -> None:
+
+        access_token= os.environ.get("ACCESS_TOKEN","")
+        if len(access_token)>0:
+            print(f"ACCESS_TOKEN \t\t-> Identified from environment")
+        mytoken=os.environ.get("FEDCLOUD_MYTOKEN","")
+        if len(mytoken)>0:
+            print(f"MYTOKEN \t\t-> Identified from environment")
+        oidc_agent_name=os.environ.get("OIDC_AGENT_ACCOUNT","")
+        if len(oidc_agent_name)>0:
+            print(f"OIDC_AGENT_ACCOUNT \t-> Identified from environment")
+
+    def check_token(self):
+        ...
+        pass       
 
