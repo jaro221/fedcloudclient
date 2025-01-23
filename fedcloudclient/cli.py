@@ -4,7 +4,7 @@ Main CLI module
 
 import click
 
-from fedcloudclient.auth import OIDCToken as token
+from fedcloudclient.checkin import token
 from fedcloudclient.conf import config
 from fedcloudclient.ec3 import ec3
 from fedcloudclient.endpoint import endpoint

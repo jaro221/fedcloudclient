@@ -139,7 +139,7 @@ class OIDCToken(Token):
             error_msg = f"Error getting access token from mytoken server: mytoken is {mytoken}"
             log_and_raise(error_msg, TokenError)
 
-    def multiple_token(self, access_token: str, oidc_agent_account: str, mytoken: str):
+    def multiple_token(self, access_token: str, oidc_agent_account: str, mytoken: str,mytoken_server: str = None):
         """
         Select valid token from multiple options
         :param access_token:
@@ -203,7 +203,20 @@ class OIDCToken(Token):
             request.raise_for_status()
 
         return sorted(vos)
+    
+    def get_checkin_id(self,oidc_token):
+        """
+        Get EGI Check-in ID from access token
 
+        :param oidc_token: the token
+
+        :return: Check-in ID
+        """
+        payload = self.decode_token(oidc_token)
+        if payload is None:
+            return None
+        return payload["sub"]
+    
     def check_access(self) -> None:
 
         access_token= os.environ.get("ACCESS_TOKEN","")

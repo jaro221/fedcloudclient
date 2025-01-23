@@ -3,10 +3,10 @@
 from datetime import datetime
 
 import click
-import liboidcagent as agent
-import requests
 
-from fedcloudclient.decorators import (oidc_params)
+from fedcloudclient.auth import OIDCToken as Token
+from fedcloudclient.decorators import oidc_params
+
 
 
 
@@ -23,7 +23,7 @@ def check(access_token):
     """
     Check validity of access token
     """
-    check_token(access_token, verbose=True)
+    Token().check_access()
 
 
 @token.command()

@@ -153,13 +153,13 @@ def oidc_params(func):
     )
     @wraps(func)
     def wrapper(*args, **kwargs):
-        from fedcloudclient.checkin import get_access_token
-
-        access_token = get_access_token(
+        from fedcloudclient.auth import OIDCToken
+        token=OIDCToken()
+        access_token = token.multiple_token(
             kwargs.pop("oidc_access_token"),
             kwargs.pop("oidc_agent_account"),
             kwargs.pop("mytoken"),
-            kwargs.pop("mytoken_server"),
+            kwargs.pop("mytoken_server")
         )
         kwargs["access_token"] = access_token
         return func(*args, **kwargs)
