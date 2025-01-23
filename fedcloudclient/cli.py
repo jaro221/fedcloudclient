@@ -20,6 +20,9 @@ def cli():
     """
     CLI main function. Intentionally empty
     """
+    """
+    https://fedcloudclient.readthedocs.io/en/2.0-alpha1/usage.html#fedcloud-token-commands
+    """
 
 
 cli.add_command(token)
