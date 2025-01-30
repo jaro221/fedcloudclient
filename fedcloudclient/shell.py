@@ -64,12 +64,6 @@ def print_comment(comment):
         print(f"rem {comment!s}")
 
 
-out_1=Shell(1)
 
-print(type(out_1))
-print(Shell.LINUX)
-
-print(print_comment({"gewgweg": False}))
-print(f"Done")
 
 

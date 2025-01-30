@@ -1,6 +1,15 @@
 """
 Define custom exceptions for fedcloudclient
 """
+class PyJWTError(Exception):
+    """
+    Base class for all exceptions
+    """
+
+    pass
+
+class InvalidTokenError(PyJWTError):
+    pass
 
 
 class FedcloudError(Exception):

@@ -68,9 +68,11 @@ def printing_dict(var_dict:dict):
     for idx, item in enumerate(var_dict):
         print(f"{item}:\t {var_dict[item]}")
 
-def verify_check_access():
+def verify_check_access()-> None:
     token = auth.OIDCToken()
     token.check_access()
+    printing_dict(token._LOG_DATA)
+    return None
 
 
 if __name__ == "__main__":
@@ -88,7 +90,7 @@ if __name__ == "__main__":
     user_id=verify_user_id(access_token_oidc)
     payload,request_json,list_vos=verify_pyload(access_token_oidc)
 
-    verify_check_access()
+    test = verify_check_access()
 
     #print(f"{type(payload)}")
     #printing_dict(payload)

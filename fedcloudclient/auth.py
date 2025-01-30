@@ -8,6 +8,9 @@ import requests
 import os
 import re
 import click
+import time
+from datetime import datetime
+import sys
 
 from fedcloudclient.conf import CONF as CONF
 from fedcloudclient.exception import TokenError
@@ -41,7 +44,10 @@ class OIDCToken(Token):
         self.mytoken = None
         self.user_id = None
         self._VO_PATTERN = "urn:mace:egi.eu:group:(.+?):(.+:)*role=member#aai.egi.eu"
-
+        self._MIN_ACCESS_TOKEN_TIME = 30
+        self._LOG_DATA={}
+    
+ 
     def get_token(self):
         """
         Return access token or raise error
@@ -149,23 +155,25 @@ class OIDCToken(Token):
         """
         if mytoken:
             try:
-
                 """need to implement from mytoken and check"""
-
                 self.get_token_from_mytoken(mytoken)
-                return
+                self._LOG_DATA["mytoken"]={"login":mytoken, "access_token":self.access_token, "exp": ""}
             except TokenError:
                 pass
         if oidc_agent_account:
             try:
                 self.get_token_from_oidc_agent(oidc_agent_account)
-                return
+                self._LOG_DATA["oidc_agent"]={"login":oidc_agent_account, "access_token":self.access_token, "exp": ""}
             except TokenError:
                 pass
         if access_token:
             self.access_token = access_token
+            self._LOG_DATA["access_token"]={"login":"ACCESS_TOKEN", "access_token":self.access_token, "exp": ""}
             return
-        log_and_raise("Cannot get access token", TokenError)
+        
+        if not self.access_token:
+            pass
+            #log_and_raise("Cannot get access token", TokenError)
         
     def oidc_discover(self) -> dict:
         """
@@ -228,8 +236,46 @@ class OIDCToken(Token):
         oidc_agent_name=os.environ.get("OIDC_AGENT_ACCOUNT","")
         if len(oidc_agent_name)>0:
             print(f"OIDC_AGENT_ACCOUNT \t-> Identified from environment")
+        #print(f"def check_access: \nACCESS_TOKEN: {access_token} \noidc_agent_name: {oidc_agent_name} \nmytoken:{mytoken}")
+        self.multiple_token(access_token,oidc_agent_name,mytoken)
+        self.check_token(True) #need to check access_tokens from more sources
 
-    def check_token(self):
-        ...
-        pass       
+    def check_token(self, verbose=False):
+        """
+        Check validity of access token
+        :param verbose:
+        :param oidc_token: the token to check
+        :return: access token, or None on error
+        """
 
+        payload = self.decode_token()
+        if payload is None:
+            return None
+
+        exp_timestamp = int(payload["exp"])
+        current_timestamp = int(time.time())
+        exp_time_in_sec = exp_timestamp - current_timestamp
+
+        if exp_time_in_sec < self._MIN_ACCESS_TOKEN_TIME:
+            self.print_error("Error: Expired access token.", False)
+            return None
+
+        if verbose:
+            exp_time_str = datetime.fromtimestamp(exp_timestamp).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            print(f"Token is valid until {exp_time_str} UTC")
+            if exp_time_in_sec < 24 * 3600:
+                print(f"Token expires in {exp_time_in_sec} seconds")
+            else:
+                exp_time_in_days = exp_time_in_sec // (24 * 3600)
+                print(f"Token expires in {exp_time_in_days} days")
+
+        
+    
+    def print_error(self,message, quiet):
+        """
+        Print error message to stderr if not quiet
+        """
+        if not quiet:
+            print(message, file=sys.stderr)

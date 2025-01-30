@@ -19,11 +19,15 @@ def token():
 
 @token.command()
 @oidc_params
+
 def check(access_token):
     """
     Check validity of access token
     """
+
     Token().check_access()
+    
+    
 
 
 @token.command()
