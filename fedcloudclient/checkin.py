@@ -36,7 +36,11 @@ def list_vos(access_token):
     """
     List VO membership(s) of access token
     """
-    vos = token_list_vos(access_token)
+    token=Token()
+    token.access_token=access_token
+    user_id=token.get_user_id()
+    request_json=token.oidc_discover()
+    vos = token.token_list_vos()
     print("\n".join(vos))
 
 
