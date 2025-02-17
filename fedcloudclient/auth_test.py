@@ -74,7 +74,11 @@ def verify_check_access()-> None:
     printing_dict(token._LOG_DATA)
     return None
 
-
+def verify_multiply(access_token, oidc_agent_name, mytoken): 
+    token = auth.OIDCToken()
+    token.multiple_token(access_token, oidc_agent_name, mytoken) 
+    pass
+    
 if __name__ == "__main__":
     print(f"Start of verifying auth.py")
 
@@ -87,8 +91,11 @@ if __name__ == "__main__":
     oidc_agent_name=os.environ.get("OIDC_AGENT_ACCOUNT","")
     access_token_oidc=verify_OIDC_AGENT(oidc_agent_name)
 
+    print(f"{access_token_check==access_token_oidc}")
+    verify_multiply(access_token_check, access_token_oidc, mytoken)
+
     user_id=verify_user_id(access_token_oidc)
-    payload,request_json,list_vos=verify_pyload(access_token_oidc)
+    payload,request_json,list_vos=verify_pyload(access_token_mytok)
 
     test = verify_check_access()
 

@@ -157,17 +157,20 @@ class OIDCToken(Token):
             try:
                 """need to implement from mytoken and check"""
                 self.get_token_from_mytoken(mytoken)
+                self.check_token()
                 self._LOG_DATA["mytoken"]={"login":mytoken, "access_token":self.access_token, "exp": ""}
             except TokenError:
                 pass
         if oidc_agent_account:
             try:
                 self.get_token_from_oidc_agent(oidc_agent_account)
+                self.check_token(True)
                 self._LOG_DATA["oidc_agent"]={"login":oidc_agent_account, "access_token":self.access_token, "exp": ""}
             except TokenError:
                 pass
         if access_token:
             self.access_token = access_token
+            self.check_token(True)
             self._LOG_DATA["access_token"]={"login":"ACCESS_TOKEN", "access_token":self.access_token, "exp": ""}
             return
         
@@ -220,7 +223,7 @@ class OIDCToken(Token):
 
         :return: Check-in ID
         """
-        payload = self.decode_token(oidc_token)
+        payload = self.decode_token() #payload = self.decode_token(oidc_token)
         if payload is None:
             return None
         return payload["sub"]
