@@ -81,7 +81,7 @@ def verify_multiply(access_token, oidc_agent_name, mytoken):
     
 if __name__ == "__main__":
     print(f"Start of verifying auth.py")
-
+    """
     access_token= os.environ.get("ACCESS_TOKEN","")
     access_token_check=verify_ACCESS_TOKEN(access_token)
 
@@ -92,9 +92,10 @@ if __name__ == "__main__":
     access_token_oidc=verify_OIDC_AGENT(oidc_agent_name)
 
     print(f"{access_token_check==access_token_oidc}")
-    token=auth.OIDCToken(None, False, True)
-    token.access_token="wrgergregreg"
-    token.check_token(True)
+    """
+    token=auth.OIDCToken(None, True, True)
+    token.get_access_token({})
+
    
     #verify_multiply(access_token, oidc_agent_name, mytoken)
 

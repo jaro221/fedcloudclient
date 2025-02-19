@@ -151,20 +151,26 @@ def oidc_params(func):
         default=CONF.get("mytoken_server"),
         metavar="url",
     )
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        from fedcloudclient.auth import OIDCToken
-        token=OIDCToken()
-
-        access_token = token.multiple_token(
-            kwargs.pop("oidc_access_token"),
-            kwargs.pop("oidc_agent_account"),
-            kwargs.pop("mytoken"),
-            kwargs.pop("mytoken_server"))
-
+    
+    @optgroup.option(
+        "--verbose",
+        help="Verbose: print status of OIDCToken",
+        default=False,
+        metavar="bool",
+        )
 
         
-        kwargs["access_token"] = token.access_token
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        
+        from fedcloudclient.auth import OIDCToken
+        token=OIDCToken(None, kwargs["verbose"],False)
+        access_token=token.gen_access_token(*args, **kwargs)
+        
+        
+        #print(f"Check token: {token.check_token()}")
+        kwargs["access_token"] = access_token
+        #print(f"\nLOG_DATA: \n {token._LOG_DATA}")
         return func(*args, **kwargs)
 
     return wrapper

@@ -1,8 +1,10 @@
 _LOG_DATA:
-  mytoken:
+  ACCESS_TOKEN:
     exp: ACCESS DENIED
-  oidc_agent:
-    exp: 3525
+  MYTOKEN:
+    exp: ACCESS DENIED
+  OIDC_AGENT:
+    exp: 1739964319
 gocdb_public_url: https://goc.egi.eu/gocdbpi/public/
 gocdb_service_group: org.openstack.nova
 log_config_file: /home/jaro221/.config/fedcloud/logging.conf

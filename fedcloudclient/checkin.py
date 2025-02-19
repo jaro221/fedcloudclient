@@ -17,26 +17,36 @@ def token():
     """
 
 
+
 @token.command()
 @oidc_params
-def check(access_token):
+def check_access(*args, **kwargs):
+    """
+    Check availability of variables for access token
+    """   
+    token=Token(None, kwargs["verbose"], False)
+    token.check_access()
+
+@token.command()
+@oidc_params
+def check(*args, **kwargs):
     """
     Check validity of access token
     """
-
-    #Token().check_access()
+    print("Token check")
+    token=Token(None, kwargs["verbose"], False)
+    token.check_token()
     
-    
-
 
 @token.command()
 @oidc_params
-def list_vos(access_token):
+def list_vos(*args, **kwargs):
     """
     List VO membership(s) of access token
     """
     
-    token=Token(None, False, True)
+    token=Token(None, kwargs["verbose"], False)
+    token.access_token=kwargs["access_token"]
     vos = token.token_list_vos()
     print("\n".join(vos))
     

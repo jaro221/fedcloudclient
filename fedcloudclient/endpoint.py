@@ -307,6 +307,7 @@ def projects(
     access_token,
     site,
     all_sites,
+    verbose,
 ):
     """
     List projects from site(s)
