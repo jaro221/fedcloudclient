@@ -36,6 +36,7 @@ DEFAULT_SETTINGS = {
     "os_protocol": "openid",
     "os_auth_type": "v3oidcaccesstoken",
     "os_identity_provider": "egi.eu",
+    "_LOG_DATA":{},
 }
 
 

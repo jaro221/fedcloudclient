@@ -13,6 +13,7 @@ from datetime import datetime
 import sys
 
 from fedcloudclient.conf import CONF as CONF
+from fedcloudclient.conf import save_config, load_env
 from fedcloudclient.exception import TokenError
 from fedcloudclient.logger import log_and_raise
 
@@ -36,7 +37,7 @@ class OIDCToken(Token):
     OIDC tokens. Managing access tokens, oidc-agent account and mytoken
     """
 
-    def __init__(self, access_token=None):
+    def __init__(self, access_token=None, verbose=False, init=False):
         super().__init__()
         self.access_token = access_token
         self.payload = None
@@ -46,7 +47,15 @@ class OIDCToken(Token):
         self._VO_PATTERN = "urn:mace:egi.eu:group:(.+?):(.+:)*role=member#aai.egi.eu"
         self._MIN_ACCESS_TOKEN_TIME = 30
         self._LOG_DATA={}
-    
+        self.verbose=verbose
+        if init==True:
+            self.init_access()
+            CONF["_LOG_DATA"]=self._LOG_DATA
+            save_config("FEDCLOUD_CONFIG",CONF)
+            print(f"Done init_access()")
+        else:
+            CONF1=load_env()
+            self._LOG_DATA=CONF["_LOG_DATA"]
  
     def get_token(self):
         """
@@ -64,15 +73,18 @@ class OIDCToken(Token):
         Decoding access token to payload
         :return:
         """
-        if not self.payload:
-            try:
-                self.payload = jwt.decode(self.access_token, options={"verify_signature": False})
-                self.user_id = self.payload["sub"]
-            except jwt.exceptions.InvalidTokenError:
-                error_msg = "Invalid access token"
-                log_and_raise(error_msg, TokenError)
+        #if not self.payload:
+        try:
+            self.payload = jwt.decode(self.access_token, options={"verify_signature": False})
+            self.user_id = self.payload["sub"]
+            return self.payload
+        except jwt.exceptions.InvalidTokenError:
+            error_msg = "Invalid access token"
+            """Move to init, up, where is not possible to obtain access_token"""
+            #log_and_raise(error_msg, TokenError) 
+            return None
 
-        return self.payload
+        
 
     def get_user_id(self) -> str:
         """
@@ -145,7 +157,7 @@ class OIDCToken(Token):
             error_msg = f"Error getting access token from mytoken server: mytoken is {mytoken}"
             log_and_raise(error_msg, TokenError)
 
-    def multiple_token(self, access_token: str, oidc_agent_account: str, mytoken: str,mytoken_server: str = None):
+    def multiple_token(self, access_token: str, oidc_agent_account: str, mytoken: str,mytoken_server: str = None, verbose:bool=False):
         """
         Select valid token from multiple options
         :param access_token:
@@ -157,23 +169,23 @@ class OIDCToken(Token):
             try:
                 """need to implement from mytoken and check"""
                 self.get_token_from_mytoken(mytoken)
-                self.check_token()
-                self._LOG_DATA["mytoken"]={"login":mytoken, "access_token":self.access_token, "exp": ""}
+                self._LOG_DATA["mytoken"]={"exp": self.check_token(True)}
             except TokenError:
-                pass
+                self._LOG_DATA["mytoken"]={"exp": "ACCESS DENIED"}
+                
         if oidc_agent_account:
             try:
                 self.get_token_from_oidc_agent(oidc_agent_account)
-                self.check_token(True)
-                self._LOG_DATA["oidc_agent"]={"login":oidc_agent_account, "access_token":self.access_token, "exp": ""}
+                self._LOG_DATA["oidc_agent"]={"exp": self.check_token(True)}
             except TokenError:
-                pass
+                self._LOG_DATA["oidc_agent"]={"exp": "ACCESS DENIED"}
         if access_token:
-            self.access_token = access_token
-            self.check_token(True)
-            self._LOG_DATA["access_token"]={"login":"ACCESS_TOKEN", "access_token":self.access_token, "exp": ""}
-            return
-        
+            try:
+                self.access_token = access_token
+                self._LOG_DATA["access_token"]={"exp": self.check_token(True)}
+            except:
+                self._LOG_DATA["access_token"]={"exp": "ACCESS DENIED"}
+            
         if not self.access_token:
             pass
             #log_and_raise("Cannot get access token", TokenError)
@@ -231,17 +243,34 @@ class OIDCToken(Token):
     def check_access(self) -> None:
 
         access_token= os.environ.get("ACCESS_TOKEN","")
-        if len(access_token)>0:
+        if len(access_token)>0 and self.verbose==True:
             print(f"ACCESS_TOKEN \t\t-> Identified from environment")
         mytoken=os.environ.get("FEDCLOUD_MYTOKEN","")
-        if len(mytoken)>0:
+        if len(mytoken)>0 and self.verbose==True:
             print(f"MYTOKEN \t\t-> Identified from environment")
         oidc_agent_name=os.environ.get("OIDC_AGENT_ACCOUNT","")
-        if len(oidc_agent_name)>0:
+        if len(oidc_agent_name)>0 and self.verbose==True:
             print(f"OIDC_AGENT_ACCOUNT \t-> Identified from environment")
         #print(f"def check_access: \nACCESS_TOKEN: {access_token} \noidc_agent_name: {oidc_agent_name} \nmytoken:{mytoken}")
         self.multiple_token(access_token,oidc_agent_name,mytoken)
         self.check_token(True) #need to check access_tokens from more sources
+    
+    def gen_access_token(self) -> str:
+        """return "ACCESS_TOKEN" """
+        for idx, item in self._LOG_DATA:
+            print(item )
+        pass
+        
+    
+    def init_access(self) -> bool:
+        """Check access from os environment in every initialization of OIDCToken"""
+        access_token= os.environ.get("ACCESS_TOKEN","")
+        mytoken=os.environ.get("FEDCLOUD_MYTOKEN","")
+        oidc_agent_name=os.environ.get("OIDC_AGENT_ACCOUNT","")
+        self.verbose=True
+        self.multiple_token(access_token,oidc_agent_name,mytoken,None, True)
+        
+        
 
     def check_token(self, verbose=False):
         """
@@ -250,7 +279,7 @@ class OIDCToken(Token):
         :param oidc_token: the token to check
         :return: access token, or None on error
         """
-
+        
         payload = self.decode_token()
         if payload is None:
             return None
@@ -263,7 +292,8 @@ class OIDCToken(Token):
             self.print_error("Error: Expired access token.", False)
             return None
 
-        if verbose:
+        exp_time_str = datetime.fromtimestamp(exp_timestamp).strftime("%Y-%m-%d %H:%M:%S")
+        if self.verbose:
             exp_time_str = datetime.fromtimestamp(exp_timestamp).strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
@@ -273,6 +303,8 @@ class OIDCToken(Token):
             else:
                 exp_time_in_days = exp_time_in_sec // (24 * 3600)
                 print(f"Token expires in {exp_time_in_days} days")
+        return exp_time_in_sec
+        
 
         
     

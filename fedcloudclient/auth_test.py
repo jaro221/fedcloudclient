@@ -92,19 +92,24 @@ if __name__ == "__main__":
     access_token_oidc=verify_OIDC_AGENT(oidc_agent_name)
 
     print(f"{access_token_check==access_token_oidc}")
-    verify_multiply(access_token_check, access_token_oidc, mytoken)
+    token=auth.OIDCToken(None, False, True)
+    token.access_token="wrgergregreg"
+    token.check_token(True)
+   
+    #verify_multiply(access_token, oidc_agent_name, mytoken)
 
+    """
     user_id=verify_user_id(access_token_oidc)
     payload,request_json,list_vos=verify_pyload(access_token_mytok)
 
     test = verify_check_access()
-
+    """
     #print(f"{type(payload)}")
     #printing_dict(payload)
     print("-------------------------------------------------")
     #printing_dict(request_json)
     print("-------------------------------------------------")
-    print(list_vos)
+    #print(list_vos)
     print(f"Break")
 
 
