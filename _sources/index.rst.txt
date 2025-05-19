@@ -6,13 +6,8 @@
    quickstart
    install
    usage
-   modules
    development
    scripts
+   modules
    FAQ
-   cheat
-   
-   
-   
-   
-   
+   cheat  
