@@ -3,11 +3,16 @@
    :caption: Contents:
 
    intro
+   quickstart
+   install
    usage
+   development
+   scripts
+   modules
    FAQ
    cheat
-   development
-   install
-   modules
-   quickstart
-   scripts
+   
+   
+   
+   
+   

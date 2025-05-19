@@ -21,7 +21,7 @@ Usage
 
 
 Authentication Options
-======================
+**********************
 
 **FedCloud** commands require access tokens for authentication. Users have multiple options for providing these tokens:
 
@@ -228,10 +228,7 @@ This design allows flexible and convenient configuration for various usage scena
 +==============================+=========================+
 |  FEDCLOUD_OIDC_ACCESS_TOKEN  |  --oidc-access-token    |
 +------------------------------+-------------------------+
-|  FEDCLOUD_MYTOKEN            |  --mytoken              |
-+------------------------------+-------------------------+
-|  FEDCLOUD_OIDC_AGENT_ACCOUNT |  --oidc-agent-account   |
-+------------------------------+-------------------------+
+
 
 For convenience, it is recommended to set transient parameters—such as access tokens—via **environment variables**.  
 This simplifies the usage of *fedcloud* commands by avoiding the need to specify these parameters on the command line each time.
